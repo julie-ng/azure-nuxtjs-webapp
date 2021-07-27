@@ -12,7 +12,7 @@ trigger:
 
 variables:
   serviceConnectionName: nuxt-ssr-app-test
-  startupCommand: node_modules/.bin/nuxt start
+  startupCommand: npm start
   webappName: nuxt-ssr-app-test
 
 pool:
