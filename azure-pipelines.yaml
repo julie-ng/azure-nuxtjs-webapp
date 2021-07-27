@@ -35,6 +35,9 @@ steps:
     archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
     replaceExistingArchive: true
 
+- upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+  artifact: drop
+
 - task: AzureWebApp@1
   displayName: 'Azure Web App Deploy'
   inputs:
