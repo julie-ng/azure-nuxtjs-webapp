@@ -1,0 +1,10 @@
+# Create Web App
+# Note: change variables as needed.
+az group create -n nuxt-ssr-webapp-rg -l westeurope
+az appservice plan create -g nuxt-ssr-webapp-rg -n nuxt-ssr-appservice-plan --is-linux --sku S1
+az webapp create -g nuxt-ssr-webapp-rg  -p nuxt-ssr-appservice-plan -n nuxt-ssr-app-test --runtime "node|14-lts"
+
+# Misc. Commands for Debugging
+az group list -o table
+az webapp list-runtimes --linux
+az webapp list -g  nuxt-ssr-webapp-rg -o table
