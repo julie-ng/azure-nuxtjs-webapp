@@ -40,7 +40,7 @@ export default {
   },
 
   server: {
-    port:  3000, // process.env.PORT, //
+    port:  process.env.PORT, //
     host: '0.0.0.0' // default: localhost
   }
 }
