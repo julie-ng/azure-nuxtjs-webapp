@@ -1,0 +1,23 @@
+name: betterThanADOIhope
+
+on:
+  push:
+    branches:
+      - github
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: npm install
+        run: npm ci
+
+      - name: Confirm Deployment
+        run: npm run confirm-deployment
+        env:
+          SELENIUM_TARGET_URL: 'https://nuxt-ssr-app-test.azurewebsites.net'
