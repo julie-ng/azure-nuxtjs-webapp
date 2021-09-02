@@ -1,0 +1,36 @@
+stages:
+- stage:
+  displayName: Confirm Deployment
+  jobs:
+  - job:
+    displayName: Confirm Deployment
+    steps:
+    - task: NodeTool@0
+      displayName: Setup Node.js
+      inputs:
+        versionSpec: '14.x'
+
+    - script: |
+        npm ci
+        npm i chromedriver --chromedriver_version=LATEST
+      displayName: npm install
+
+    - script: sleep 120
+      displayName: Wait 2 min for deployment to finish
+
+    # This UI driven test goes to the specified website
+    # and checks the page title to be "Hello Azure…"
+    # For details, see /deployment.test.js
+    - script: |
+        npm run confirm
+      displayName: Open URL in browser to confirm deployment
+      env:
+        SELENIUM_TARGET_URL: $(websiteUrl)
+
+    - script: |
+        sleep 180
+        npm run confirm
+      displayName: Retry after 3 min
+      condition: failed()
+      env:
+        SELENIUM_TARGET_URL: $(websiteUrl)

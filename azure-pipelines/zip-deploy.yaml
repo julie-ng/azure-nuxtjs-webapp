@@ -1,0 +1,75 @@
+name: $(BuildID)
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+    - dev
+  paths:
+    exclude:
+    - README.md
+
+pr: none
+
+variables:
+  webappName: nuxt-test-zip-deploy
+  websiteUrl: 'https://nuxt-test-zip-deploy.azurewebsites.net'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage:
+  displayName: Build and Deploy
+  # zip deployment specific vars
+  variables:
+    serviceConnectionName: nuxt-test-rg
+    startupCommand: npm start
+  jobs:
+  - job:
+    displayName: Build and Deploy
+    steps:
+    - template: templates/build.steps.yaml
+
+    # Zip Deployment
+    # --------------
+    # In this scenario Azure DevOps creates a zip package that includes:
+    # - `node_modules` directory
+    # - `.nuxt` build directory
+    #
+    # Azure DevOps needs to "archive" the file to make it accessible to
+    # downstream jobs and tasks. This zip file is then sent to Azure
+    # App Service, which unpacks it and runs the startup command
+    # defined at the beginning of this stage: `npm start`
+
+    # Create Zip File
+    - task: ArchiveFiles@2
+      displayName: Create Zip File
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
+
+    # Pass Zip File to Downstream tasks
+    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      displayName: Upload Zip File
+      artifact: drop
+
+    # Deploy to Azure App Service with Zip File
+    - task: AzureWebApp@1
+      displayName: Zip Deploy to Azure Web App
+      inputs:
+        azureSubscription: $(serviceConnectionName)
+        appType: webAppLinux
+        appName: $(webappName)
+        runtimeStack: 'NODE|14-lts'
+        package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        startUpCommand: $(startupCommand)
+
+  # Confirm Deployment
+  # ------------------
+  # Run a UI driven test to confirm deployment was successful
+- template: templates/confirm.stage.yaml

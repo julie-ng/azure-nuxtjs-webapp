@@ -43,3 +43,13 @@ $ npm run generate
 ```
 
 For detailed explanation on how things work, check out the [documentation](https://nuxtjs.org).
+
+---
+
+## Resources
+
+### Pipeline
+
+- https://stackoverflow.com/questions/64638097/ui-tests-in-azure-pipelines-displays-error-cannot-find-chrome-binary-using-node
+- https://stackoverflow.com/questions/50642308/webdriverexception-unknown-error-devtoolsactiveport-file-doesnt-exist-while-t
+- https://github.com/microsoft/axe-pipelines-samples/tree/main/typescript-selenium-webdriver-sample

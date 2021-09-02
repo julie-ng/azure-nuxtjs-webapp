@@ -1,0 +1,70 @@
+name: $(BuildID)
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+    - dev
+  paths:
+    exclude:
+    - README.md
+
+pr: none
+
+variables:
+  webappName: nuxt-test-git-deploy
+  websiteUrl: 'https://nuxt-test-git-deploy.azurewebsites.net'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+# Git Deployment Job
+# ------------------
+# In this scenario, the Azure DevOps does very little.
+# Notice the deployment job does not even run `npm install`
+# because Azure App Service will create the build
+# automatically including installing all dependencies.
+#
+# This follows best practice of building an application
+# for the target platform for consistent deployments. If
+# you build locally (or on Azure DevOps) and your application
+# has native bindings, you may get a false positive locally
+# or in your CI build.
+stages:
+- stage:
+  displayName: Git Deploy
+  variables:
+  # The credentials are application scoped and stored as
+  # secrets in a Pipeline Library Group, which is configured
+  # to restrict pipeline access.
+  - group: git-deployment-credentials
+  jobs:
+
+  # A Git Deployment is only a `git push` to a git remote repo.
+  # First you need to configure the remote with application
+  # specific credentials (see "Deployment Center" in Azure Portal).
+  #
+  # Secondly CI/CD will often checkout applications in a
+  # "detatched" HEAD state. We need to push that reference
+  # (not a branch) to the deployment platform.
+  - job:
+    displayName: Git Deploy
+    steps:
+    - checkout: self
+    # - template: templates/build.steps.yaml # Azure will build for us
+    - bash: |
+        git status
+        git remote add azure https://$SCM_USER:$SCM_SECRET@nuxt-test-git-deploy.scm.azurewebsites.net/nuxt-test-git-deploy.git
+        git push azure HEAD:master
+      # Note: secrets must be explicitly mapped to the environment
+      # and `lib-var-` is a personal naming convention
+      env:
+        SCM_USER: $(lib-var-git-username)
+        SCM_SECRET: $(lib-var-git-password)
+      displayName: Git Deploy
+
+  # Confirm Deployment
+  # ------------------
+  # Run a UI driven test to confirm deployment was successful
+- template: templates/confirm.stage.yaml
