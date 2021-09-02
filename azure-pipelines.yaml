@@ -71,19 +71,22 @@ stages:
       inputs:
         versionSpec: '14.x'
 
-    - script: npm ci
+    - script: |
+        npm ci
+        npm install -g chromedriver
       displayName: npm install
 
-    - script: sleep 180
-      displayName: Wait 3 min for deployment to finish
+    # - script: sleep 180
+    #   displayName: Wait 3 min for deployment to finish
 
     - script: |
         SELENIUM_TARGET_URL=$(websiteUrl) npm run confirm-deploy
       displayName: Open URL in browser to confirm deployment
-      continueOnError: true
+      # continueOnError: true
 
-    - script: |
-        sleep 120
-        SELENIUM_TARGET_URL=$(websiteUrl) npm run confirm-deploy
-      displayName: Wait 2 more min and try again
-      condition: failed()
+    # - script: |
+    #     sleep 120
+    #     SELENIUM_TARGET_URL=$(websiteUrl) npm run confirm-deploy
+    #   displayName: Retry after 2 min
+    #   condition: failed()
+
