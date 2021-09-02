@@ -6,13 +6,18 @@
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "node ./node_modules/nuxt/bin/nuxt.js start",
-    "generate": "nuxt generate"
+    "generate": "nuxt generate",
+    "confirm": "jest ./deployment.test.js"
   },
   "dependencies": {
     "core-js": "^3.15.1",
     "nuxt": "^2.15.7"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "chromedriver": "^92.0.2",
+    "jest": "^27.1.0",
+    "selenium-webdriver": "^4.0.0-rc-1"
+  },
   "engines": {
     "node": "14.x"
   }
