@@ -19,42 +19,52 @@ variables:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-- task: NodeTool@0
-  displayName: Setup Node.js
-  inputs:
-    versionSpec: '14.x'
+stages:
+- stage: buildAndDeployStage
+  jobs:
+  - job: buildAndDeployJob
+    steps:
 
-- script: npm install --production
-  displayName: Install Dependencies
+    - task: NodeTool@0
+      displayName: Setup Node.js
+      inputs:
+        versionSpec: '14.x'
 
-- script: npm run build
-  displayName: Build Nuxt App
+    - script: npm ci
+      displayName: Install Dependencies
 
-- task: ArchiveFiles@2
-  displayName: Create Zip File
-  inputs:
-    rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
-    includeRootFolder: false
-    archiveType: zip
-    archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-    replaceExistingArchive: true
+    - script: npm run build
+      displayName: Build Nuxt App
 
-- upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-  displayName: Upload Zip File
-  artifact: drop
+    - task: ArchiveFiles@2
+      displayName: Create Zip File
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
 
-- task: AzureWebApp@1
-  displayName: Zip Deploy to Azure Web App
-  inputs:
-    azureSubscription: $(serviceConnectionName)
-    appType: webAppLinux
-    appName: $(webappName)
-    runtimeStack: 'NODE|10.10'
-    package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip # $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-    startUpCommand: $(startupCommand)
+    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      displayName: Upload Zip File
+      artifact: drop
 
-- script: |
-    sleep 300
-    npm run confirm-deploy
-  displayName: Wait 5 min and confirm deployment
+    - task: AzureWebApp@1
+      displayName: Zip Deploy to Azure Web App
+      inputs:
+        azureSubscription: $(serviceConnectionName)
+        appType: webAppLinux
+        appName: $(webappName)
+        runtimeStack: 'NODE|14-lts'
+        package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip # $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+        startUpCommand: $(startupCommand)
+
+- stage: confirmDeploymentStage
+  jobs:
+  - job: confirmDeploymentJob
+    steps:
+    - script: sleep 300
+      displayName: Wait 5 min for deployment to finish
+
+    - script: npm run confirm-deploy
+      displayName: Open URL in browser to confirm deployment
