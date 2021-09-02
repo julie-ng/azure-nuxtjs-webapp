@@ -15,56 +15,75 @@ variables:
   serviceConnectionName: nuxt-ssr-app-test
   startupCommand: npm start
   webappName: nuxt-ssr-app-test
+  websiteUrl: 'https://nuxt-ssr-app-test.azurewebsites.net'
 
 pool:
   vmImage: 'ubuntu-latest'
 
 stages:
-- stage: buildAndDeployStage
-  jobs:
-  - job: buildAndDeployJob
-    steps:
+# - stage: buildAndDeployStage
+#   displayName: Build and Deploy
+#   jobs:
+#   - job: buildAndDeployJob
+#     steps:
 
+#     - task: NodeTool@0
+#       displayName: Setup Node.js
+#       inputs:
+#         versionSpec: '14.x'
+
+#     - script: npm ci
+#       displayName: Install Dependencies
+
+#     - script: npm run build
+#       displayName: Build Nuxt App
+
+#     - task: ArchiveFiles@2
+#       displayName: Create Zip File
+#       inputs:
+#         rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+#         includeRootFolder: false
+#         archiveType: zip
+#         archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+#         replaceExistingArchive: true
+
+#     - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+#       displayName: Upload Zip File
+#       artifact: drop
+
+#     - task: AzureWebApp@1
+#       displayName: Zip Deploy to Azure Web App
+#       inputs:
+#         azureSubscription: $(serviceConnectionName)
+#         appType: webAppLinux
+#         appName: $(webappName)
+#         runtimeStack: 'NODE|14-lts'
+#         package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip # $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+#         startUpCommand: $(startupCommand)
+
+- stage: confirmDeploymentStage
+  displayName: Confirm Deployment in Browser
+  jobs:
+  - job: confirmDeploymentJob
+    steps:
     - task: NodeTool@0
       displayName: Setup Node.js
       inputs:
         versionSpec: '14.x'
 
     - script: npm ci
-      displayName: Install Dependencies
+      displayName: npm install
 
-    - script: npm run build
-      displayName: Build Nuxt App
+    - script: sleep 180
+      displayName: Wait 3 min for deployment to finish
 
-    - task: ArchiveFiles@2
-      displayName: Create Zip File
-      inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
-        includeRootFolder: false
-        archiveType: zip
-        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-        replaceExistingArchive: true
-
-    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-      displayName: Upload Zip File
-      artifact: drop
-
-    - task: AzureWebApp@1
-      displayName: Zip Deploy to Azure Web App
-      inputs:
-        azureSubscription: $(serviceConnectionName)
-        appType: webAppLinux
-        appName: $(webappName)
-        runtimeStack: 'NODE|14-lts'
-        package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip # $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-        startUpCommand: $(startupCommand)
-
-- stage: confirmDeploymentStage
-  jobs:
-  - job: confirmDeploymentJob
-    steps:
-    - script: sleep 300
-      displayName: Wait 5 min for deployment to finish
-
-    - script: npm run confirm-deploy
+    - script: |
+        SELENIUM_TARGET_URL=$(websiteUrl) npm run confirm-deploy
       displayName: Open URL in browser to confirm deployment
+      continueOnError: true
+
+    - script: |
+        sleep 120
+        SELENIUM_TARGET_URL=$(websiteUrl) npm run confirm-deploy
+      displayName: Wait 2 more min and try again
+      condition: failed()
