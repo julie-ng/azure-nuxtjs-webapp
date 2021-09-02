@@ -6,6 +6,7 @@ trigger:
     include:
     - feat/pipeline
     - main
+    - dev
   paths:
     exclude:
     - README.md
@@ -52,3 +53,8 @@ steps:
     runtimeStack: 'NODE|10.10'
     package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip # $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
     startUpCommand: $(startupCommand)
+
+- script: |
+    sleep 300
+    npm run confirm-deploy
+  displayName: Wait 5 min and confirm deployment
