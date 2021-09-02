@@ -18,6 +18,6 @@ jobs:
         run: npm ci
 
       - name: Confirm Deployment
-        run: npm run confirm-deployment
+        run: npm run confirm-deploy
         env:
           SELENIUM_TARGET_URL: 'https://nuxt-ssr-app-test.azurewebsites.net'
