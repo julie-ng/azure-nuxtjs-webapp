@@ -1,10 +1,83 @@
-# Create Web App
-# Note: change variables as needed.
-az group create -n nuxt-ssr-webapp-rg -l westeurope
-az appservice plan create -g nuxt-ssr-webapp-rg -n nuxt-ssr-appservice-plan --is-linux --sku S1
-az webapp create -g nuxt-ssr-webapp-rg  -p nuxt-ssr-appservice-plan -n nuxt-ssr-app-test --runtime "node|14-lts"
+# ==============================
+# Testing Git vs Zip Deployments
+# ==============================
 
-# Misc. Commands for Debugging
-az group list -o table
-az webapp list-runtimes --linux
-az webapp list -g  nuxt-ssr-webapp-rg -o table
+# Resource Names
+export NUXT_BASE_NAME=nuxt-test
+export NUXT_APP_RG="$NUXT_BASE_NAME-rg"
+
+# Node.js latest stable is v16. But App Service only supports up to v14.
+az webapp list-runtimes --linux | grep NODE
+export AZURE_NODE_LATEST_RUNTIME="NODE|14-lts"
+
+# --------------
+# Resource Group
+# --------------
+
+az group create -g $NUXT_APP_RG -l westeurope
+
+# ----------------
+# App Service Plan
+# ----------------
+
+az appservice plan create \
+	--name "$NUXT_BASE_NAME-asp" \
+	--resource-group $NUXT_APP_RG \
+	--number-of-workers 3 \
+	--is-linux \
+	--sku S1
+
+
+# -----------
+# Create Apps
+# -----------
+
+# Git Deployment
+az webapp create \
+	--name "$NUXT_BASE_NAME-git-deploy" \
+	--plan "$NUXT_BASE_NAME-asp" \
+	--resource-group $NUXT_APP_RG \
+	--runtime $AZURE_NODE_LATEST_RUNTIME \
+	--deployment-local-git
+
+# Zip Deployment
+az webapp create \
+	--name "$NUXT_BASE_NAME-zip-deploy" \
+	--plan "$NUXT_BASE_NAME-asp" \
+	--resource-group $NUXT_APP_RG \
+	--runtime $AZURE_NODE_LATEST_RUNTIME
+
+
+# ---------------------
+# Configure for Nuxt.js
+# ---------------------
+
+az webapp config appsettings set -g $NUXT_APP_RG -n "$NUXT_BASE_NAME-git-deploy" --settings HOST=0.0.0.0
+
+az webapp config appsettings set -g $NUXT_APP_RG -n "$NUXT_BASE_NAME-zip-deploy" --settings HOST=0.0.0.0
+
+
+# ------------------------------
+# local git - configure & deploy
+# ------------------------------
+
+# Note: assumes you have a user credential set
+
+# Configure
+git remote add azure $(az webapp deployment source config-local-git -n "$NUXT_BASE_NAME-git-deploy" -g $NUXT_APP_RG | jq -r .url)
+
+# Verify remote url
+git remote -v
+
+# Push to azure (note: branch names project specific here)
+git push azure dev:master
+
+# -------
+# Logging
+# -------
+
+# Git
+az webapp log tail -n "$NUXT_BASE_NAME-git-deploy" -g $NUXT_APP_RG
+
+# Zip
+az webapp log tail -n "$NUXT_BASE_NAME-zip-deploy" -g $NUXT_APP_RG
