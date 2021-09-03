@@ -16,16 +16,16 @@ variables:
   webappName: nuxt-test-zip-deploy
   websiteUrl: 'https://nuxt-test-zip-deploy.azurewebsites.net'
 
+  # zip deployment specific vars
+  serviceConnectionName: nuxt-test-rg
+  startupCommand: npm start
+
 pool:
   vmImage: 'ubuntu-latest'
 
 stages:
 - stage:
   displayName: Build and Deploy
-  # zip deployment specific vars
-  variables:
-    serviceConnectionName: nuxt-test-rg
-    startupCommand: npm start
   jobs:
   - job:
     displayName: Build and Deploy
