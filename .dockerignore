@@ -1,3 +1,4 @@
 *.azcli
 *.log
 .editorconfig
+node_modules/
