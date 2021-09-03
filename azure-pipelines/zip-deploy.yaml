@@ -9,6 +9,7 @@ trigger:
   paths:
     exclude:
     - README.md
+    - azure-pipelines/git-deploy.yaml
 
 pr: none
 

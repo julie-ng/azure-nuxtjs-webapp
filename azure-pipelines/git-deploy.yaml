@@ -9,6 +9,7 @@ trigger:
   paths:
     exclude:
     - README.md
+    - azure-pipelines/zip-deploy.yaml
 
 pr: none
 
@@ -48,6 +49,9 @@ stages:
   # Secondly CI/CD will often checkout applications in a
   # "detatched" HEAD state. We need to push that reference
   # (not a branch) to the deployment platform.
+  #
+  # Because we are there is no branch, git fast-forwards will
+  # always fail, which is why we need `--force`
   - job:
     displayName: Git Deploy
     steps:
@@ -56,7 +60,7 @@ stages:
     - bash: |
         git status
         git remote add azure https://$SCM_USER:$SCM_SECRET@nuxt-test-git-deploy.scm.azurewebsites.net/nuxt-test-git-deploy.git
-        git push azure HEAD:master
+        git push --force azure HEAD:master
       # Note: secrets must be explicitly mapped to the environment
       # and `lib-var-` is a personal naming convention
       env:
