@@ -32,6 +32,10 @@ az appservice plan create \
 # Create Apps
 # -----------
 
+# Optional Resets
+az webapp delete -n "$NUXT_BASE_NAME-git-deploy" -g $NUXT_APP_RG
+az webapp delete -n "$NUXT_BASE_NAME-zip-deploy" -g $NUXT_APP_RG
+
 # Git Deployment
 az webapp create \
 	--name "$NUXT_BASE_NAME-git-deploy" \
@@ -52,9 +56,9 @@ az webapp create \
 # Configure for Nuxt.js
 # ---------------------
 
-az webapp config appsettings set -g $NUXT_APP_RG -n "$NUXT_BASE_NAME-git-deploy" --settings HOST=0.0.0.0
+az webapp config appsettings set -g $NUXT_APP_RG -n "$NUXT_BASE_NAME-git-deploy" --settings HOST=0.0.0.0 DEPLOYMENT_TYPE="Git Deploy"
 
-az webapp config appsettings set -g $NUXT_APP_RG -n "$NUXT_BASE_NAME-zip-deploy" --settings HOST=0.0.0.0
+az webapp config appsettings set -g $NUXT_APP_RG -n "$NUXT_BASE_NAME-zip-deploy" --settings HOST=0.0.0.0  DEPLOYMENT_TYPE="Zip Deploy"
 
 
 # ------------------------------
@@ -81,3 +85,5 @@ az webapp log tail -n "$NUXT_BASE_NAME-git-deploy" -g $NUXT_APP_RG
 
 # Zip
 az webapp log tail -n "$NUXT_BASE_NAME-zip-deploy" -g $NUXT_APP_RG
+
+
