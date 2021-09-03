@@ -2,9 +2,7 @@ const { Builder, By, Key, until } = require('selenium-webdriver')
 const chrome = require('selenium-webdriver/chrome')
 
 const testUrl = process.env.SELENIUM_TARGET_URL || 'http://localhost:3000'
-// const driverPath = process.env.CHROMEWEBDRIVER || '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
-
-// const options = new Options().setBinary(driverPath).headless()
+const buildNo = process.env.APP_BUILD_SHA || '(none)'
 
 describe(`Deployment to ${testUrl}`, () => {
 	let driver
@@ -22,7 +20,13 @@ describe(`Deployment to ${testUrl}`, () => {
 
 	test('has "Hello Azure" page title', async () => {
 		await driver.get(testUrl)
-		const title = await driver.findElement(By.tagName('h1')).getText()
-		expect(title).toContain('Hello Azure from Nuxt.js')
+		const title = await driver.findElement(By.css('#js-title')).getText()
+		expect(title).toEqual('Hello Azure from Nuxt.js')
+	})
+
+	test('has correct Build #', async () => {
+		await driver.get(testUrl)
+		const title = await driver.findElement(By.css('#js-build-no')).getText()
+		expect(title).toEqual(`Commit ${buildNo}`)
 	})
 })

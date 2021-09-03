@@ -14,8 +14,10 @@ trigger:
 pr: none
 
 variables:
+  webappRg: nuxt-test-rg
   webappName: nuxt-test-git-deploy
   websiteUrl: 'https://nuxt-test-git-deploy.azurewebsites.net'
+  serviceConnectionName: nuxt-test-rg
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -34,7 +36,7 @@ pool:
 # or in your CI build.
 stages:
 - stage:
-  displayName: Git Deploy
+  displayName: No Build, just Git Deploy
   variables:
   # The credentials are application scoped and stored as
   # secrets in a Pipeline Library Group, which is configured
@@ -56,7 +58,9 @@ stages:
     displayName: Git Deploy
     steps:
     - checkout: self
+    - template: templates/commit-sha.step.yaml
     # - template: templates/build.steps.yaml # Azure will build for us
+
     - bash: |
         git status
         git remote add azure https://$SCM_USER:$SCM_SECRET@nuxt-test-git-deploy.scm.azurewebsites.net/nuxt-test-git-deploy.git
@@ -67,6 +71,20 @@ stages:
         SCM_USER: $(lib-var-git-username)
         SCM_SECRET: $(lib-var-git-password)
       displayName: Git Deploy
+
+    # Config App with CLI because the web app task requires JSON 🙄
+    - task: AzureCLI@2
+      displayName: Configure Git sha
+      inputs:
+        azureSubscription: $(serviceConnectionName)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az version
+          az webapp config appsettings set \
+            --settings APP_BUILD_SHA=$(commitSha) \
+            --name $(webappName) \
+            --resource-group $(webappRg)
 
   # Confirm Deployment
   # ------------------

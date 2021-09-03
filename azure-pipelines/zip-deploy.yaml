@@ -16,6 +16,7 @@ pr: none
 variables:
   webappName: nuxt-test-zip-deploy
   websiteUrl: 'https://nuxt-test-zip-deploy.azurewebsites.net'
+  buildNo: ${{ variables['Build.BuildId'] }}
 
   # zip deployment specific vars
   serviceConnectionName: nuxt-test-rg
@@ -32,6 +33,7 @@ stages:
     displayName: Build Nuxt and Zip File
     steps:
     - template: templates/build.steps.yaml
+    - template: templates/commit-sha.step.yaml
 
     # Zip Deployment
     # --------------
@@ -53,6 +55,8 @@ stages:
         appName: $(webappName)
         runtimeStack: 'NODE|14-lts'
         startUpCommand: $(startupCommand)
+        appSettings: -DEPLOYMENT_TYPE "Zip Deploy" -APP_BUILD_SHA $(commitSha)
+
 
   # Confirm Deployment
   # ------------------

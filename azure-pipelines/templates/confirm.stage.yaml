@@ -1,6 +1,7 @@
 stages:
 - stage:
   displayName: Confirm Deployment
+
   jobs:
   - job:
     displayName: Confirm Deployment
@@ -12,11 +13,10 @@ stages:
 
     - script: |
         npm ci
-        npm i chromedriver --chromedriver_version=LATEST
+        npm install chromedriver --chromedriver_version=LATEST
       displayName: npm install
 
-    - script: sleep 120
-      displayName: Wait 2 min for deployment to finish
+    - template: ./commit-sha.step.yaml
 
     # This UI driven test goes to the specified website
     # and checks the page title to be "Hello Azure…"
@@ -26,11 +26,22 @@ stages:
       displayName: Open URL in browser to confirm deployment
       env:
         SELENIUM_TARGET_URL: $(websiteUrl)
+        APP_BUILD_SHA: $(commitSha)
 
     - script: |
-        sleep 180
+        sleep 120
         npm run confirm
-      displayName: Retry after 3 min
+      displayName: Retry after 2 min
       condition: failed()
       env:
         SELENIUM_TARGET_URL: $(websiteUrl)
+        APP_BUILD_SHA: $(commitSha)
+
+    - script: |
+        sleep 120
+        npm run confirm
+      displayName: Retry after 2 min
+      condition: failed()
+      env:
+        SELENIUM_TARGET_URL: $(websiteUrl)
+        APP_BUILD_SHA: $(commitSha)

@@ -1,7 +1,7 @@
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'azure-test',
+    title: 'Nuxt.js Azure Web App',
     htmlAttrs: {
       lang: 'en'
     },
@@ -40,7 +40,15 @@ export default {
   },
 
   server: {
-    port:  process.env.PORT, //
-    host: '0.0.0.0' // default: localhost
+    port:  process.env.PORT || 8080,
+    host: '0.0.0.0' // because App Service will containerize the app
+  },
+
+  env: {
+  },
+
+  publicRuntimeConfig: {
+    commitSha: process.env.APP_BUILD_SHA || '(unset)',
+    deploymentType: process.env.DEPLOYMENT_TYPE || 'unset',
   }
 }

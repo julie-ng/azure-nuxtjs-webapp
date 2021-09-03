@@ -1,0 +1,6 @@
+
+# Prefer shorter ~7 commit sha over `Build.SourceVersion`
+steps:
+- script: |
+    echo "##vso[task.setvariable variable=commitSha]$(git rev-parse --short HEAD)"
+  displayName: Get commit sha
