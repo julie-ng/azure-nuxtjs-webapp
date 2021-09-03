@@ -2,6 +2,7 @@
   <div>
     <h1 id="js-title"><a href="https://github.com/julie-ng/azure-nuxtjs-webapp" target="_blank"><span>Hello Azure</span> from Nuxt.js</a></h1>
     <h2 id="js-build-no">Commit {{ $config.commitSha }}</h2>
+    <h2>{{ $config.deploymentType }}</h2>
   </div>
 </template>
 
