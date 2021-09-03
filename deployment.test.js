@@ -14,9 +14,12 @@ describe(`Deployment to ${testUrl}`, () => {
 			.build()
 	})
 
-	afterAll(async () => {
-		await driver.quit()
-	}, 15000)
+	// Flakey - not clean, but build agents
+	// are chucked when finished anyway 🤷‍♀️
+	// afterAll(async () => {
+	// 	await driver.close()
+	// 	await driver.quit()
+	// }, 15000)
 
 	test('has "Hello Azure" page title', async () => {
 		await driver.get(testUrl)
