@@ -1,0 +1,22 @@
+steps:
+- task: NodeTool@0
+  displayName: Setup Node.js
+  inputs:
+    versionSpec: '14.x'
+
+- script: |
+    npm ci
+    npm install chromedriver --chromedriver_version=LATEST
+  displayName: npm install
+
+- template: ./commit-sha.step.yaml
+
+# This UI driven test goes to the specified website
+# and checks the page title to be "Hello Azure…"
+# For details, see /deployment.test.js
+- script: |
+    npm run confirm
+  displayName: Open URL in browser to confirm deployment
+  env:
+    SELENIUM_TARGET_URL: $(websiteUrl)
+    APP_BUILD_SHA: $(commitSha)

@@ -3,47 +3,21 @@ stages:
   displayName: Confirm Deployment
 
   jobs:
-  - job:
-    displayName: Confirm Deployment
+  - job: try1
+    displayName: 'Attempt #1'
+    continueOnError: true
     steps:
-    - task: NodeTool@0
-      displayName: Setup Node.js
-      inputs:
-        versionSpec: '14.x'
+    - template: ./check-website.steps.yaml
 
-    - script: |
-        npm ci
-        npm install chromedriver --chromedriver_version=LATEST
-      displayName: npm install
+  - job: try2
+    dependsOn: try1
+    displayName: 'Attempt #2'
+    continueOnError: true
+    steps:
+    - template: ./check-website.steps.yaml
 
-    - template: ./commit-sha.step.yaml
-
-    # This UI driven test goes to the specified website
-    # and checks the page title to be "Hello Azure…"
-    # For details, see /deployment.test.js
-    - script: |
-        npm run confirm
-      displayName: Open URL in browser to confirm deployment
-      continueOnError: true
-      env:
-        SELENIUM_TARGET_URL: $(websiteUrl)
-        APP_BUILD_SHA: $(commitSha)
-
-    - script: |
-        sleep 120
-        npm run confirm
-      displayName: Retry after 2 min
-      condition: failed()
-      continueOnError: true
-      env:
-        SELENIUM_TARGET_URL: $(websiteUrl)
-        APP_BUILD_SHA: $(commitSha)
-
-    - script: |
-        sleep 120
-        npm run confirm
-      displayName: Retry after 2 min
-      condition: failed()
-      env:
-        SELENIUM_TARGET_URL: $(websiteUrl)
-        APP_BUILD_SHA: $(commitSha)
+  - job: finalAttempt
+    dependsOn: try2
+    displayName: 'Final Attempt'
+    steps:
+    - template: ./check-website.steps.yaml
