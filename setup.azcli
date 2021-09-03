@@ -85,5 +85,3 @@ az webapp log tail -n "$NUXT_BASE_NAME-git-deploy" -g $NUXT_APP_RG
 
 # Zip
 az webapp log tail -n "$NUXT_BASE_NAME-zip-deploy" -g $NUXT_APP_RG
-
-
