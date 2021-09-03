@@ -28,8 +28,8 @@ stages:
 - stage:
   displayName: Build and Deploy
   jobs:
-  - job:
-    displayName: Build and Deploy
+  - job: buildJob
+    displayName: Build Nuxt and Zip File
     steps:
     - template: templates/build.steps.yaml
 
@@ -59,6 +59,10 @@ stages:
       displayName: Upload Zip File
       artifact: drop
 
+  - job: deployJob
+    displayName: Deploy Zip to App Service
+    dependsOn: buildJob
+    steps:
     # Deploy to Azure App Service with Zip File
     - task: AzureWebApp@1
       displayName: Zip Deploy to Azure Web App
