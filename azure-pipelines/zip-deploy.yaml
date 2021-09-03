@@ -38,40 +38,20 @@ stages:
     # In this scenario Azure DevOps creates a zip package that includes:
     # - `node_modules` directory
     # - `.nuxt` build directory
-    #
+
     # Azure DevOps needs to "archive" the file to make it accessible to
     # downstream jobs and tasks. This zip file is then sent to Azure
     # App Service, which unpacks it and runs the startup command
     # defined at the beginning of this stage: `npm start`
-
-    # Create Zip File
-    - task: ArchiveFiles@2
-      displayName: Create Zip File
-      inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
-        includeRootFolder: false
-        archiveType: zip
-        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-        replaceExistingArchive: true
-
-    # Pass Zip File to Downstream tasks
-    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-      displayName: Upload Zip File
-      artifact: drop
-
-  - job: deployJob
-    displayName: Deploy Zip to App Service
-    dependsOn: buildJob
-    steps:
-    # Deploy to Azure App Service with Zip File
     - task: AzureWebApp@1
       displayName: Zip Deploy to Azure Web App
       inputs:
+        package: $(System.DefaultWorkingDirectory)
+        deploymentMethod: zipDeploy
         azureSubscription: $(serviceConnectionName)
         appType: webAppLinux
         appName: $(webappName)
         runtimeStack: 'NODE|14-lts'
-        package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         startUpCommand: $(startupCommand)
 
   # Confirm Deployment
