@@ -24,6 +24,7 @@ stages:
     - script: |
         npm run confirm
       displayName: Open URL in browser to confirm deployment
+      continueOnError: true
       env:
         SELENIUM_TARGET_URL: $(websiteUrl)
         APP_BUILD_SHA: $(commitSha)
@@ -33,6 +34,7 @@ stages:
         npm run confirm
       displayName: Retry after 2 min
       condition: failed()
+      continueOnError: true
       env:
         SELENIUM_TARGET_URL: $(websiteUrl)
         APP_BUILD_SHA: $(commitSha)
