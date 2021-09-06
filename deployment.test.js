@@ -7,6 +7,11 @@ const buildNo = process.env.APP_BUILD_SHA || '(none)'
 describe(`Deployment to ${testUrl}`, () => {
 	let driver
 
+	// Why Headless?
+	// -------------
+	// Note: in build agents, the browsers must run headlessly
+	// for security reasons. For details, see:
+	// https://stackoverflow.com/questions/50642308/webdriverexception-unknown-error-devtoolsactiveport-file-doesnt-exist-while-t
 	beforeAll(async () => {
 		driver = await new Builder()
 			.forBrowser('chrome')
