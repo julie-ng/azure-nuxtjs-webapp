@@ -1,6 +1,12 @@
-# Nuxt.js on Azure App Service Test
+# Nuxt.js on Azure App Service
 
-Debugging Nuxt.js on Azure App Service
+Example Azure Pipelines for deploying a _non-containerized_ [Nuxt.js](https://nuxtjs.org/) App to Azure App Service
+
+| Status | npm run build | Deployment Method | URL |
+|:--|:--|:--|:--|
+| [![Build Status](https://dev.azure.com/julie-msft/public-demos/_apis/build/status/nuxtjs-webapp-git-deploy?branchName=main)](https://dev.azure.com/julie-msft/public-demos/_build/latest?definitionId=44&branchName=main) | CI Pipeline | [git push](./azure-pipelines/git-deploy.yaml) |  [nuxt-test-git-deploy.azurewebsites.net ](https://nuxt-test-git-deploy.azurewebsites.net) |
+| [![Build Status](https://dev.azure.com/julie-msft/public-demos/_apis/build/status/nuxtjs-webapp-zip-deploy?branchName=main)](https://dev.azure.com/julie-msft/public-demos/_build/latest?definitionId=45&branchName=main) | App Service | [zip file](./azure-pipelines/zip-deploy.yaml) | [nuxt-test-zip-deploy.azurewebsites.net ](https://nuxt-test-zip-deploy.azurewebsites.net) |
+
 
 ## Requirements
 
@@ -10,8 +16,9 @@ Debugging Nuxt.js on Azure App Service
 
 ## Files of Interest
 
-- [`azure-pipelines.yaml`](./azure-pipelines.yaml)  
-  zip deploy of application to Azure App Service
+- [`azure-pipelines/git-deploy.yaml`](./azure-pipelines/git-deploy.yaml)  
+
+- [`azure-pipelines/zip-deploy.yaml`](./azure-pipelines/zip-deploy.yaml)  
 
 - [`nuxt-config.js`](./nuxt-config.js)  
   configuration, including binding to `0.0.0.0` for docker and listening for port based on environment variable, i.e. `process.env.PORT`
