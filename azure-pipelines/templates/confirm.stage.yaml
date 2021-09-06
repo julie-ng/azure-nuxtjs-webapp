@@ -3,21 +3,23 @@ stages:
   displayName: Confirm Deployment
 
   jobs:
-  - job: try1
+  - job: firstTry
     displayName: 'Attempt #1'
     continueOnError: true
     steps:
     - template: ./check-website.steps.yaml
 
-  - job: try2
-    dependsOn: try1
+  - job: secondTry
     displayName: 'Attempt #2'
+    dependsOn: firstTry
     continueOnError: true
+    condition: failed()
     steps:
     - template: ./check-website.steps.yaml
 
   - job: finalAttempt
-    dependsOn: try2
+    dependsOn: secondTry
+    condition: failed()
     displayName: 'Final Attempt'
     steps:
     - template: ./check-website.steps.yaml
